@@ -38,6 +38,7 @@ class DataSource(Enum):
     ccxt = "ccxt"
     iexcloud = "iexcloud"
     joinquant = "joinquant"
+    mt5 = "mt5"
     quandl = "quandl"
     quantconnect = "quantconnect"
     rqdata = "rqdata"

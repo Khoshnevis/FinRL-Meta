@@ -4,13 +4,20 @@ alpaca_trade_api>=2.1.0
 ccxt>=1.90.41
 elegantrl
 gputil>=1.4.0
-gym>=0.17 #gym>=0.24.1
 jqdatasdk>=1.8.10
 lz4>=4.0.1
 
+# MT5 Data Processor Requirements
+MetaTrader5>=5.0.45
+
+# Forex RL Training Requirements
+gymnasium>=0.29.0
+stable-baselines3>=2.7.0
+torch>=2.0.0
+
 # plot
 matplotlib>=3.5.2
-
+mplfinance>=0.12.10b0
 
 numpy>=1.23.1
 pandas>=1.4.3
@@ -32,7 +39,6 @@ scikit-learn>=1.1.1
 
 # packaging
 setuptools>=63.1.0
-stable-baselines3[extra]>=1.5.0
 stockstats>=0.4.1
 tensorboard
 vectorbt[full]>=0.23.3

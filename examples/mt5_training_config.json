@@ -1,0 +1,81 @@
+{
+    "training": {
+        "data_source": "mt5",
+        "timeframe": "1h",
+        "forex_pairs": ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD"],
+        "technical_indicators": [
+            "macd", "macd_signal", "macd_hist",
+            "rsi", "cci", "dx", "adx",
+            "boll_ub", "boll_lb", "boll_mid",
+            "close_10_sma", "close_30_sma", "close_50_sma",
+            "volume_10_sma", "volume_30_sma"
+        ],
+        "training_period_days": 540,
+        "model": {
+            "algorithm": "PPO",
+            "total_timesteps": 100000,
+            "learning_rate": 3e-4,
+            "n_steps": 2048,
+            "batch_size": 64,
+            "n_epochs": 10,
+            "gamma": 0.99,
+            "gae_lambda": 0.95,
+            "clip_range": 0.2,
+            "ent_coef": 0.01
+        }
+    },
+    "environment": {
+        "initial_balance": 100000,
+        "max_position_size": 0.1,
+        "transaction_fee": 0.0001,
+        "slippage": 0.00005,
+        "max_drawdown": 0.20,
+        "risk_per_trade": 0.02,
+        "reward_function": "sharpe",
+        "lookback_window": 20,
+        "trading_hours": {
+            "london": {"start": 8, "end": 16},
+            "new_york": {"start": 13, "end": 21},
+            "tokyo": {"start": 0, "end": 8}
+        }
+    },
+    "backtesting": {
+        "period_days": 90,
+        "timeframes": ["15m", "30m", "1h", "4h"],
+        "num_episodes": 5,
+        "metrics": [
+            "total_reward",
+            "final_balance", 
+            "sharpe_ratio",
+            "max_drawdown",
+            "win_rate",
+            "profit_factor",
+            "calmar_ratio"
+        ]
+    },
+    "risk_management": {
+        "stop_loss": 0.02,
+        "take_profit": 0.03,
+        "trailing_stop": true,
+        "position_sizing": "kelly",
+        "max_positions": 3,
+        "correlation_threshold": 0.7
+    },
+    "data_quality": {
+        "min_data_points": 1000,
+        "max_missing_ratio": 0.05,
+        "outlier_threshold": 3.0,
+        "required_columns": [
+            "tic", "time", "open", "high", "low", "close", "volume", "day"
+        ]
+    },
+    "output": {
+        "save_model": true,
+        "save_results": true,
+        "create_plots": true,
+        "log_level": "INFO",
+        "results_directory": "./results",
+        "models_directory": "./trained_models",
+        "logs_directory": "./logs"
+    }
+}

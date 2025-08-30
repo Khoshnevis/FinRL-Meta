@@ -2,10 +2,10 @@ import datetime
 import math
 import random
 
-import gym
+import gymnasium as gym
 import numpy as np
-from gym import spaces
-from gym.utils import seeding
+from gymnasium import spaces
+from gymnasium.utils import seeding
 from stable_baselines3.common.vec_env import DummyVecEnv
 
 from meta.env_fx_trading.util.log_render import render_to_file
@@ -92,7 +92,7 @@ class tgym(gym.Env):
         self.transaction_limit_order = []
         self.current_draw_downs = [0.0] * len(self.assets)
         self.max_draw_downs = [0.0] * len(self.assets)
-        self.max_draw_down_pct = sum(self.max_draw_downs) / self.balance * 100
+        self.max_draw_down_pct = sum(self.max_draw_downs) / max(self.balance, 1) * 100
         self.current_step = 0
         self.episode = -1
         self.current_holding = [0] * len(self.assets)
@@ -111,8 +111,10 @@ class tgym(gym.Env):
 
         self.reward_range = (-np.inf, np.inf)
         self.action_space = spaces.Box(low=0, high=3, shape=(len(self.assets),))
-        # first two 3 = balance,current_holding, max_draw_down_pct
-        _space = 3 + len(self.assets) + len(self.assets) * len(self.observation_list)
+        # Calculate observation space: 2 (balance, max_draw_down_pct) + 
+        # len(assets) (current holdings) + len(assets) (current drawdowns) + 
+        # len(assets) * len(observation_list) (technical indicators for each asset)
+        _space = 2 + len(self.assets) + len(self.assets) + len(self.assets) * len(self.observation_list)
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(_space,))
         print(
             f"initial done:\n"
@@ -348,6 +350,7 @@ class tgym(gym.Env):
             np.array(obs).astype(np.float32),
             reward,
             done,
+            False,  # truncated
             {"Close": self.tranaction_close_this_step},
         )
 
@@ -379,9 +382,10 @@ class tgym(gym.Env):
         assert len(v) == len(self.assets) * len(cols)
         return v
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
         # Reset the state of the environment to an initial state
-        self.seed()
+        if seed is not None:
+            self.seed(seed)
 
         if self.random_start:
             self.current_step = random.choice(range(int(len(self.dt_datetime) * 0.5)))
@@ -397,7 +401,7 @@ class tgym(gym.Env):
         self.transaction_limit_order = []
         self.current_draw_downs = [0.0] * len(self.assets)
         self.max_draw_downs = [0.0] * len(self.assets)
-        self.max_draw_down_pct = sum(self.max_draw_downs) / self.balance * 100
+        self.max_draw_down_pct = sum(self.max_draw_downs) / max(self.balance, 1) * 100
         self.episode = -1
         self.current_holding = [0] * len(self.assets)
         self.tranaction_open_this_step = []
@@ -407,13 +411,11 @@ class tgym(gym.Env):
         self.log_header = True
         self.visualization = False
 
-        _space = (
-            [self.balance, self.max_draw_down_pct]
-            + [0] * len(self.assets)
-            + [0] * len(self.assets)
-            + self.get_observation(self.current_step)
-        )
-        return np.array(_space).astype(np.float32)
+        observation_data = self.get_observation(self.current_step)
+        
+        _space = [self.balance, self.max_draw_down_pct] + [0] * len(self.assets) + [0] * len(self.assets) + observation_data
+        
+        return np.array(_space).astype(np.float32), {}
 
     def render(self, mode="human", title=None, **kwargs):
         # Render the environment to the screen

@@ -56,6 +56,10 @@ class DataProcessor:
             from meta.data_processors.joinquant import Joinquant
 
             processor_dict = {self.data_source: Joinquant}
+        elif self.data_source == DataSource.mt5:
+            from meta.data_processors.mt5 import MT5
+
+            processor_dict = {self.data_source: MT5}
         elif self.data_source == DataSource.quandl:
             from meta.data_processors.quandl import Quandl
 
